@@ -52,6 +52,7 @@ int main(int argc, char** argv){
   ROS_INFO("Average max distance: [%.2f]", MAX_DIST);
   double depression_radians = std::asin(MAST_HEIGHT / MAX_DIST);
   ROS_INFO("Depression degrees: [%.2f]", depression_radians * 180 / PI);
+  ROS_INFO("Depression radians: [%.2f]", depression_radians);
   lidar.shutdown();
 
   // TF Node Initialization
@@ -61,12 +62,25 @@ int main(int argc, char** argv){
   while(n.ok()){
     broadcaster.sendTransform(
       tf::StampedTransform(
-        tf::Transform(tf::Quaternion(0, depression_radians, 0, 1), tf::Vector3(MAST_POS_X, MAST_POS_Y, MAST_HEIGHT)),
+        tf::Transform(tf::Quaternion(depression_radians, 0, 0), tf::Vector3(MAST_POS_X, MAST_POS_Y, MAST_HEIGHT)),
         ros::Time::now(),"base_link", "laser"));
     broadcaster.sendTransform(
       tf::StampedTransform(
         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(MAST_POS_X, MAST_POS_Y, MAST_HEIGHT - 0.2)),
         ros::Time::now(),"base_link", "zed_camera_center"));
+    broadcaster.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(tf::Quaternion(0, 0, 0), tf::Vector3(MAST_POS_X, MAST_POS_Y, MAST_HEIGHT - 0.17)),
+        ros::Time::now(),"base_link", "imu_link"));
+    broadcaster.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(tf::Quaternion(0, 0, 0), tf::Vector3(MAST_POS_X, MAST_POS_Y,0.30)),
+        ros::Time::now(),"base_link", "base_stabilized"));
+    broadcaster.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(tf::Quaternion(0, 0, 0), tf::Vector3(MAST_POS_X, MAST_POS_Y,0.0)),
+        ros::Time::now(),"base_link", "base_footprint"));
+
 
     r.sleep();
   } 
